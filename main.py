@@ -7,10 +7,10 @@ import pandas as pd
 
 ###### Loading Data ######
 training_data = np.loadtxt("data/train.csv", delimiter=",", dtype=str)[1:]
-x_test = np.loadtxt("data/test.csv", delimiter=",", dtype=str)[1:].astype('int32')
-test = pd.read_csv('data/test.csv')
+x_test = np.loadtxt("data/test.csv", delimiter=",", dtype=str)[1:].astype("int32")
+test = pd.read_csv("data/test.csv")
 # print(training_data[:5])
-y_train, x_train = training_data[:, 0].reshape((-1, 1)).astype('int32'), training_data[:, 1:].astype('int32')
+y_train, x_train = training_data[:, 0].reshape((-1, 1)).astype("int32"), training_data[:, 1:].astype("int32")
 x_train = x_train.reshape((len(x_train), 28, 28))
 x_test = x_test.reshape((len(x_test), 28, 28))
 # print(X_train.shape, X_test.shape)
@@ -36,17 +36,23 @@ plt.show()
 ###### Models ######
 model = Sequential(
     [
+        tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(28, 28, 1)),
+        tf.keras.layers.MaxPooling2D(2, 2),
+        tf.keras.layers.Conv2D(32, (3, 3), activation="relu"),
+        tf.keras.layers.MaxPooling2D(2, 2),
         Flatten(input_shape=(28, 28)),
         Dense(units=25, activation="relu", name="layer1"),
         Dense(units=18, activation="relu", name="layer2"),
         Dense(units=13, activation="relu", name="layer3"),
-        Dense(units=10, activation="linear", name="layer4")
-    ], name="my_model"
+        Dense(units=10, activation="linear", name="layer4"),
+    ],
+    name="my_model",
 )
 
 model.compile(
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001)
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+    metrics=['accuracy']
 )
 
 model.fit(x_train, y_train, epochs=50)
@@ -57,5 +63,5 @@ print(y_pred)
 
 
 ###### Submission ######
-output = pd.DataFrame({'ImageId': test.index + 1, 'Label': y_pred})
-output.to_csv('submission.csv', index=False)
+output = pd.DataFrame({"ImageId": test.index + 1, "Label": y_pred})
+output.to_csv("submission.csv", index=False)
